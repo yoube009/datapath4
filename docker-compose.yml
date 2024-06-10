@@ -1,0 +1,24 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql_custom
+    ports:
+      - "3312:3306"  # Exponer MySQL en el puerto 3312 del host
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # Establecer la contraseña del root
+      # MYSQL_USER: user                  # Opcional: Crear un usuario
+      # MYSQL_PASSWORD: password          # Contraseña para el usuario creado
+    volumes:
+      - ./mysql_data:/var/lib/mysql                          # Volumen para los datos de MySQL
+      - ./DBs/OLAP.sql:/docker-entrypoint-initdb.d/OLAP.sql  # Montar el script OLAP
+      - ./DBs/OLTP.sql:/docker-entrypoint-initdb.d/OLTP.sql  # Montar el script OLTP
+    restart: always  # El contenedor se reiniciará automáticamente si se detiene
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mysql_data:
+    driver: local
